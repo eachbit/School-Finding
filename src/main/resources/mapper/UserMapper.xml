@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.project.mapper.UserMapper">
+
+    <select id="selectById" resultType="com.project.pojo.User">
+        SELECT id, username, password, role, contact, created_at
+        FROM sys_user
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByUsername" resultType="com.project.pojo.User">
+        SELECT id, username, password, role, contact, created_at
+        FROM sys_user
+        WHERE username = #{username}
+    </select>
+
+    <insert id="insert" parameterType="com.project.pojo.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_user (username, password, role, contact, created_at)
+        VALUES (#{username}, #{password}, #{role}, #{contact}, NOW())
+    </insert>
+
+</mapper>

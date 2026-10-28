@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.project.mapper.ClaimMapper">
+
+    <sql id="claimVoBase">
+        c.id, c.item_id, i.title AS item_title, i.type AS item_type, i.status AS item_status,
+        c.applicant_id, au.username AS applicant_name, c.proof, c.answer, c.status, c.review_opinion,
+        c.reviewer_id, ru.username AS reviewer_name, c.handover_by, hb.username AS handover_by_name,
+        c.created_at, c.updated_at
+    </sql>
+
+    <sql id="claimVoItemSecret">
+        i.hidden_feature AS item_hidden_feature, i.verify_question AS item_verify_question,
+        i.verify_answer AS item_verify_answer
+    </sql>
+
+    <sql id="claimJoins">
+        FROM claim c
+        LEFT JOIN item i ON i.id = c.item_id
+        LEFT JOIN sys_user au ON au.id = c.applicant_id
+        LEFT JOIN sys_user ru ON ru.id = c.reviewer_id
+        LEFT JOIN sys_user hb ON hb.id = c.handover_by
+    </sql>
+
+    <insert id="insert" parameterType="com.project.pojo.Claim" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO claim (item_id, applicant_id, proof, answer, status, created_at, updated_at)
+        VALUES (#{itemId}, #{applicantId}, #{proof}, #{answer}, #{status}, NOW(), NOW())
+    </insert>
+
+    <select id="selectById" resultType="com.project.pojo.Claim">
+        SELECT *
+        FROM claim
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByIdForUpdate" resultType="com.project.pojo.Claim">
+        SELECT *
+        FROM claim
+        WHERE id = #{id}
+        FOR UPDATE
+    </select>
+
+    <select id="selectVOById" resultType="com.project.vo.ClaimVO">
+        SELECT <include refid="claimVoBase"/>, <include refid="claimVoItemSecret"/>
+        <include refid="claimJoins"/>
+        WHERE c.id = #{id}
+    </select>
+
+    <select id="selectValidByItemAndApplicant" resultType="com.project.pojo.Claim">
+        SELECT *
+        FROM claim
+        WHERE item_id = #{itemId}
+          AND applicant_id = #{applicantId}
+          AND status IN ('PENDING', 'APPROVED', 'HANDED')
+        ORDER BY id DESC
+        LIMIT 1
+    </select>
+
+    <select id="selectApprovedByItem" resultType="com.project.pojo.Claim">
+        SELECT *
+        FROM claim
+        WHERE item_id = #{itemId}
+          AND status IN ('APPROVED', 'HANDED')
+        ORDER BY id DESC
+        LIMIT 1
+    </select>
+
+    <select id="selectByApplicant" resultType="com.project.vo.ClaimVO">
+        SELECT <include refid="claimVoBase"/>
+        <include refid="claimJoins"/>
+        WHERE c.applicant_id = #{applicantId}
+        ORDER BY c.id DESC
+    </select>
+
+    <select id="selectAdminPage" resultType="com.project.vo.ClaimVO">
+        SELECT <include refid="claimVoBase"/>
+        <include refid="claimJoins"/>
+        <where>
+            <if test="status != null and status != ''">
+                AND c.status = #{status}
+            </if>
+            <if test="itemId != null">
+                AND c.item_id = #{itemId}
+            </if>
+        </where>
+        ORDER BY c.id DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countAdmin" resultType="long">
+        SELECT COUNT(*)
+        FROM claim c
+        <where>
+            <if test="status != null and status != ''">
+                AND c.status = #{status}
+            </if>
+            <if test="itemId != null">
+                AND c.item_id = #{itemId}
+            </if>
+        </where>
+    </select>
+
+    <update id="updateReview">
+        UPDATE claim
+        SET status         = #{status},
+            review_opinion = #{reviewOpinion},
+            reviewer_id    = #{reviewerId},
+            updated_at     = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE claim
+        SET status         = #{status},
+            review_opinion = #{reviewOpinion},
+            updated_at     = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateHandover">
+        UPDATE claim
+        SET status      = #{status},
+            handover_by = #{handoverBy},
+            updated_at  = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <select id="countByStatus" resultType="long">
+        SELECT COUNT(*)
+        FROM claim
+        WHERE status = #{status}
+    </select>
+
+</mapper>

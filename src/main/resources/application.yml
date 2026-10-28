@@ -1,0 +1,46 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: School-Finding
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # 默认值就是本机开发用的那套；换机器时用环境变量覆盖，不用改代码：
+    #   set DB_PASSWORD=你的密码   （PowerShell: $env:DB_PASSWORD="你的密码"）
+    # 也支持 DB_HOST / DB_PORT / DB_NAME / DB_USERNAME
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:school_finding}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:123456}
+    hikari:
+
+      maximum-pool-size: 10
+      minimum-idle: 2
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    default-property-inclusion: non_null
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.project.pojo
+  configuration:
+    map-underscore-to-camel-case: true
+
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+  default-flat-param-object: true
+
+app:
+  token:
+
+    expire-hours: 24
