@@ -1,0 +1,10 @@
+target/
+*.iml
+.idea/
+*.log
+!docs/verify-flow.log
+.DS_Store
+
+.local/
+uploads/
+__pycache__/
